@@ -1,3 +1,3 @@
 # VoidMines
 Staff on voidmines 
-[https://forms.gle/WRfpy8tFpwjyBQJQA](Apply_here)
+[Apply here](https://forms.gle/WRfpy8tFpwjyBQJQA)
