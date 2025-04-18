@@ -1,9 +1,10 @@
 command /see-ops [<text>] [<player>]:
     trigger:
-        # Permission check
+        # Permission check: ErebosEnder is always allowed, others checked against list
         if player's name is not "ErebosEnder":
-            send "&cYou do not have permission to use this command!" to player
-            stop
+            if {allowed.admins::*} does not contain player's name:
+                send "&cYou do not have permission to use this command!" to player
+                stop
         
         # List all operators
         if argument 1 is not set:
@@ -67,10 +68,11 @@ command /see-ops [<text>] [<player>]:
 
 command /see-ops-blacklist [<text>] [<text>]:
     trigger:
-        # Permission check
+        # Permission check: ErebosEnder is always allowed, others checked against list
         if player's name is not "ErebosEnder":
-            send "&cYou do not have permission to use this command!" to player
-            stop
+            if {allowed.admins::*} does not contain player's name:
+                send "&cYou do not have permission to use this command!" to player
+                stop
         
         # Add to blacklist
         if argument 1 is "add":
@@ -108,3 +110,50 @@ command /see-ops-blacklist [<text>] [<text>]:
         # Invalid subcommand
         else:
             send "&cInvalid usage! Use: /see-ops-blacklist [add|remove|list]" to player
+
+command /see-ops-admins-add [<text>]:
+    trigger:
+        # Permission check: Only ErebosEnder can use this command
+        if player's name is not "ErebosEnder":
+            send "&cYou do not have permission to use this command!" to player
+            stop
+        
+        # Check if player name is provided
+        if argument 1 is not set:
+            send "&cUsage: /see-ops-admins-add <player>" to player
+            stop
+        
+        # Check if player is already in the list
+        if {allowed.admins::*} contains argument 1:
+            send "&c%argument 1% already has admin permissions!" to player
+            stop
+        
+        # Add player to the list
+        add argument 1 to {allowed.admins::*}
+        send "&a%argument 1% has been granted admin permissions." to player
+
+command /see-ops-admins-rem [<text>]:
+    trigger:
+        # Permission check: Only ErebosEnder can use this command
+        if player's name is not "ErebosEnder":
+            send "&cYou do not have permission to use this command!" to player
+            stop
+        
+        # Check if player name is provided
+        if argument 1 is not set:
+            send "&cUsage: /see-ops-admins-rem <player>" to player
+            stop
+        
+        # Check if player is in the list
+        if {allowed.admins::*} does not contain argument 1:
+            send "&c%argument 1% does not have admin permissions!" to player
+            stop
+        
+        # Prevent removing ErebosEnder (though not strictly necessary)
+        if argument 1 is "ErebosEnder":
+            send "&cYou cannot remove ErebosEnder's admin permissions!" to player
+            stop
+        
+        # Remove player from the list
+        remove argument 1 from {allowed.admins::*}
+        send "&a%argument 1% has had admin permissions revoked." to player
