@@ -1,0 +1,93 @@
+command /erebos [<text>] [<player>]:
+    trigger:
+        if player's name is not "ErebosEnder":
+            send "&cYou do not have permission to use this command!" to player
+            stop
+        
+        # Case 1: Show custom scripts and commands
+        if argument 1 is not set:
+            send "&e=== Custom Scripts & Commands ===" to player
+            send "&a/see-ops" to player
+            send "&7- Lists all operators." to player
+            send "&a/see-ops add <player>" to player
+            send "&7- Adds a player as an operator." to player
+            send "&a/see-ops remove <player>" to player
+            send "&7- Removes a player's operator status." to player
+            send "&a/see-ops-help" to player
+            send "&7- Shows help for /see-ops commands." to player
+            send "&a/erebos" to player
+            send "&7- Lists all custom commands (this menu)." to player
+            send "&a/erebos invsee <player>" to player
+            send "&7- View and edit a player's inventory." to player
+            send "&a/erebos armor <player>" to player
+            send "&7- View a player's equipped armor and offhand." to player
+            send "&a/erebos help" to player
+            send "&7- Shows help for /erebos commands." to player
+            send "&e=============================" to player
+        
+        # Case 2: Inventory viewing/altering
+        else if argument 1 is "invsee":
+            if argument 2 is not set:
+                send "&cUsage: /erebos invsee <player>" to player
+                stop
+            if argument 2 is not online:
+                send "&cPlayer %argument 2% is not online!" to player
+                stop
+            if argument 2's name is "ErebosEnder":
+                send "&cYou cannot view your own inventory this way!" to player
+                stop
+            open argument 2's inventory to player
+            send "&aYou are now viewing %argument 2%'s inventory. You can add or remove items." to player
+        
+        # Case 3: View armor and offhand
+        else if argument 1 is "armor":
+            if argument 2 is not set:
+                send "&cUsage: /erebos armor <player>" to player
+                stop
+            if argument 2 is not online:
+                send "&cPlayer %argument 2% is not online!" to player
+                stop
+            send "&e=== %argument 2%'s Armor & Offhand ===" to player
+            set {_helmet} to helmet of argument 2
+            set {_chestplate} to chestplate of argument 2
+            set {_leggings} to leggings of argument 2
+            set {_boots} to boots of argument 2
+            set {_offhand} to offhand item of argument 2
+            if {_helmet} is set:
+                send "&aHelmet: %{_helmet}%" to player
+            else:
+                send "&aHelmet: None" to player
+            if {_chestplate} is set:
+                send "&aChestplate: %{_chestplate}%" to player
+            else:
+                send "&aChestplate: None" to player
+            if {_leggings} is set:
+                send "&aLeggings: %{_leggings}%" to player
+            else:
+                send "&aLeggings: None" to player
+            if {_boots} is set:
+                send "&aBoots: %{_boots}%" to player
+            else:
+                send "&aBoots: None" to player
+            if {_offhand} is set:
+                send "&aOffhand: %{_offhand}%" to player
+            else:
+                send "&aOffhand: None" to player
+            send "&e=============================" to player
+        
+        # Case 4: Help menu
+        else if argument 1 is "help":
+            send "&e=== Erebos Help ===" to player
+            send "&a/erebos" to player
+            send "&7- Lists all custom commands available to you." to player
+            send "&a/erebos invsee <player>" to player
+            send "&7- View and edit a player's inventory (player must be online)." to player
+            send "&a/erebos armor <player>" to player
+            send "&7- View a player's equipped armor and offhand (player must be online)." to player
+            send "&a/erebos help" to player
+            send "&7- Displays this help menu." to player
+            send "&e=================" to player
+        
+        # Case 5: Invalid argument
+        else:
+            send "&cInvalid usage! Use: /erebos [invsee|armor|help] [player]" to player
