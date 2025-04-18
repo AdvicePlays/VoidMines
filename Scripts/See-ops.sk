@@ -1,0 +1,110 @@
+command /see-ops [<text>] [<player>]:
+    trigger:
+        # Permission check
+        if player's name is not "ErebosEnder":
+            send "&cYou do not have permission to use this command!" to player
+            stop
+        
+        # List all operators
+        if argument 1 is not set:
+            loop all players:
+                if loop-player is an op:
+                    add loop-player to {_ops::*}
+            if size of {_ops::*} is 0:
+                send "&eThere are no operators on the server." to player
+            else:
+                send "&eCurrent Operators:" to player
+                loop {_ops::*}:
+                    send "&7- %loop-value%" to player
+        
+        # Add an operator
+        else if argument 1 is "add":
+            if argument 2 is not set:
+                send "&cUsage: /see-ops add <player>" to player
+                stop
+            set {_target} to argument 2
+            if {_target} is not set:
+                send "&cPlayer %argument 2% is not online!" to player
+                stop
+            if {_target} is an op:
+                send "&c%{_target}% is already an operator!" to player
+                stop
+            if {blacklist::*} contains {_target}'s name:
+                send "&c%{_target}% is blacklisted and cannot be made an operator!" to player
+                stop
+            execute console command "/op %{_target}%"
+            send "&a%{_target}% has been made an operator." to player
+        
+        # Remove an operator
+        else if argument 1 is "remove":
+            if argument 2 is not set:
+                send "&cUsage: /see-ops remove <player>" to player
+                stop
+            set {_target} to argument 2
+            if {_target} is not set:
+                send "&cPlayer %argument 2% is not online!" to player
+                stop
+            if {_target} is not an op:
+                send "&c%{_target}% is not an operator!" to player
+                stop
+            execute console command "/deop %{_target}%"
+            send "&a%{_target}% is no longer an operator." to player
+        
+        # Check operator status
+        else if argument 1 is "status":
+            if argument 2 is not set:
+                send "&cUsage: /see-ops status <player>" to player
+                stop
+            set {_target} to argument 2
+            if {_target} is an op:
+                send "&e%{_target}% is an operator." to player
+            else:
+                send "&e%{_target}% is not an operator." to player
+        
+        # Invalid subcommand
+        else:
+            send "&cInvalid usage! Use: /see-ops [add|remove|status]" to player
+
+command /see-ops-blacklist [<text>] [<text>]:
+    trigger:
+        # Permission check
+        if player's name is not "ErebosEnder":
+            send "&cYou do not have permission to use this command!" to player
+            stop
+        
+        # Add to blacklist
+        if argument 1 is "add":
+            if argument 2 is not set:
+                send "&cUsage: /see-ops-blacklist add <player>" to player
+                stop
+            set {_target} to argument 2
+            if {blacklist::*} contains {_target}:
+                send "&c%{_target}% is already blacklisted!" to player
+                stop
+            add {_target} to {blacklist::*}
+            send "&a%{_target}% has been added to the blacklist." to player
+        
+        # Remove from blacklist
+        else if argument 1 is "remove":
+            if argument 2 is not set:
+                send "&cUsage: /see-ops-blacklist remove <player>" to player
+                stop
+            set {_target} to argument 2
+            if {blacklist::*} does not contain {_target}:
+                send "&c%{_target}% is not on the blacklist!" to player
+                stop
+            remove {_target} from {blacklist::*}
+            send "&a%{_target}% has been removed from the blacklist." to player
+        
+        # List blacklisted players
+        else if argument 1 is "list":
+            if size of {blacklist::*} is 0:
+                send "&eThere are no blacklisted players." to player
+            else:
+                send "&eBlacklisted Players:" to player
+                loop {blacklist::*}:
+                    send "&7- %loop-value%" to player
+        
+        # Invalid subcommand
+        else:
+            send "&cInvalid usage! Use: /see-ops-blacklist [add|remove|list]" to player
