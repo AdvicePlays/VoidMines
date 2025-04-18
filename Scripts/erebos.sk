@@ -1,8 +1,16 @@
+# Initialize allowed admins list on load
+on load:
+    if {allowed.admins::*} is not set:
+        delete {allowed.admins::*} # No default admins; ErebosEnder is always allowed
+        # Add other players here if needed, e.g., set {allowed.admins::*} to "Player2", "Player3"
+
 command /erebos [<text>] [<player>]:
     trigger:
+        # Permission check: ErebosEnder is always allowed, others checked against list
         if player's name is not "ErebosEnder":
-            send "&cYou do not have permission to use this command!" to player
-            stop
+            if {allowed.admins::*} does not contain player's name:
+                send "&cYou do not have permission to use this command!" to player
+                stop
         
         # Case 1: Show custom scripts and commands
         if argument 1 is not set:
@@ -13,16 +21,30 @@ command /erebos [<text>] [<player>]:
             send "&7- Adds a player as an operator." to player
             send "&a/see-ops remove <player>" to player
             send "&7- Removes a player's operator status." to player
-            send "&a/see-ops-help" to player
-            send "&7- Shows help for /see-ops commands." to player
+            send "&a/see-ops status <player>" to player
+            send "&7- Checks a player's operator status." to player
+            send "&a/see-ops-blacklist add <player>" to player
+            send "&7- Blacklists a player from becoming an operator." to player
+            send "&a/see-ops-blacklist remove <player>" to player
+            send "&7- Removes a player from the operator blacklist." to player
+            send "&a/see-ops-blacklist list" to player
+            send "&7- Lists all blacklisted players." to player
+            send "&a/see-ops-admins-add <player>" to player
+            send "&7- Grants a player access to /see-ops commands." to player
+            send "&a/see-ops-admins-rem <player>" to player
+            send "&7- Revokes a player's access to /see-ops commands." to player
             send "&a/erebos" to player
             send "&7- Lists all custom commands (this menu)." to player
             send "&a/erebos invsee <player>" to player
-            send "&7- View and edit a player's inventory." to player
+            send "&7- Views and edits a player's inventory." to player
             send "&a/erebos armor <player>" to player
-            send "&7- View a player's equipped armor and offhand." to player
+            send "&7- Views a player's equipped armor." to player
             send "&a/erebos help" to player
             send "&7- Shows help for /erebos commands." to player
+            send "&a/erebos-admins-add <player>" to player
+            send "&7- Grants a player access to admin commands." to player
+            send "&a/erebos-admins-rem <player>" to player
+            send "&7- Revokes a player's access to admin commands." to player
             send "&e=============================" to player
         
         # Case 2: Inventory viewing/altering
@@ -33,13 +55,13 @@ command /erebos [<text>] [<player>]:
             if argument 2 is not online:
                 send "&cPlayer %argument 2% is not online!" to player
                 stop
-            if argument 2's name is "ErebosEnder":
+            if argument 2's name is player's name:
                 send "&cYou cannot view your own inventory this way!" to player
                 stop
             open argument 2's inventory to player
             send "&aYou are now viewing %argument 2%'s inventory. You can add or remove items." to player
         
-        # Case 3: View armor and offhand
+        # Case 3: View armor
         else if argument 1 is "armor":
             if argument 2 is not set:
                 send "&cUsage: /erebos armor <player>" to player
@@ -47,12 +69,11 @@ command /erebos [<text>] [<player>]:
             if argument 2 is not online:
                 send "&cPlayer %argument 2% is not online!" to player
                 stop
-            send "&e=== %argument 2%'s Armor & Offhand ===" to player
+            send "&e=== %argument 2%'s Armor ===" to player
             set {_helmet} to helmet of argument 2
             set {_chestplate} to chestplate of argument 2
             set {_leggings} to leggings of argument 2
             set {_boots} to boots of argument 2
-            set {_offhand} to offhand item of argument 2
             if {_helmet} is set:
                 send "&aHelmet: %{_helmet}%" to player
             else:
@@ -69,10 +90,6 @@ command /erebos [<text>] [<player>]:
                 send "&aBoots: %{_boots}%" to player
             else:
                 send "&aBoots: None" to player
-            if {_offhand} is set:
-                send "&aOffhand: %{_offhand}%" to player
-            else:
-                send "&aOffhand: None" to player
             send "&e=============================" to player
         
         # Case 4: Help menu
@@ -81,13 +98,64 @@ command /erebos [<text>] [<player>]:
             send "&a/erebos" to player
             send "&7- Lists all custom commands available to you." to player
             send "&a/erebos invsee <player>" to player
-            send "&7- View and edit a player's inventory (player must be online)." to player
+            send "&7- Views and edits a player's inventory (player must be online)." to player
             send "&a/erebos armor <player>" to player
-            send "&7- View a player's equipped armor and offhand (player must be online)." to player
+            send "&7- Views a player's equipped armor (player must be online)." to player
             send "&a/erebos help" to player
             send "&7- Displays this help menu." to player
+            send "&a/erebos-admins-add <player>" to player
+            send "&7- Grants a player access to admin commands (ErebosEnder only)." to player
+            send "&a/erebos-admins-rem <player>" to player
+            send "&7- Revokes a player's access to admin commands (ErebosEnder only)." to player
             send "&e=================" to player
         
         # Case 5: Invalid argument
         else:
-            send "&cInvalid usage! Use: /erebos [invsee|armor|help] [player]" to player
+            send "&cInvalid usage! Use: /erebos [invsee|armor|help|admins-add|admins-rem]" to player
+
+command /erebos-admins-add [<text>]:
+    trigger:
+        # Permission check: Only ErebosEnder can use this command
+        if player's name is not "ErebosEnder":
+            send "&cYou do not have permission to use this command!" to player
+            stop
+        
+        # Check if player name is provided
+        if argument 1 is not set:
+            send "&cUsage: /erebos-admins-add <player>" to player
+            stop
+        
+        # Check if player is already in the list
+        if {allowed.admins::*} contains argument 1:
+            send "&c%argument 1% already has admin permissions!" to player
+            stop
+        
+        # Add player to the list
+        add argument 1 to {allowed.admins::*}
+        send "&a%argument 1% has been granted admin permissions." to player
+
+command /erebos-admins-rem [<text>]:
+    trigger:
+        # Permission check: Only ErebosEnder can use this command
+        if player's name is not "ErebosEnder":
+            send "&cYou do not have permission to use this command!" to player
+            stop
+        
+        # Check if player name is provided
+        if argument 1 is not set:
+            send "&cUsage: /erebos-admins-rem <player>" to player
+            stop
+        
+        # Check if player is in the list
+        if {allowed.admins::*} does not contain argument 1:
+            send "&c%argument 1% does not have admin permissions!" to player
+            stop
+        
+        # Prevent removing ErebosEnder (though not strictly necessary)
+        if argument 1 is "ErebosEnder":
+            send "&cYou cannot remove ErebosEnder's admin permissions!" to player
+            stop
+        
+        # Remove player from the list
+        remove argument 1 from {allowed.admins::*}
+        send "&a%argument 1% has had admin permissions revoked." to player
