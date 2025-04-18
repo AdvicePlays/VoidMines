@@ -1,0 +1,40 @@
+command /setspawn:
+    permission: spawn.admin
+    trigger:
+        set {spawn.location} to location of player
+        send "&aSpawn location has been set!" to player
+
+command /set-op-spawn:
+    permission: op.spawn.admin
+    trigger:
+        set {op.spawn.location} to location of player
+        send "&aOperator spawn location has been set!" to player
+
+command /spawn:
+    trigger:
+        if {spawn.location} is set:
+            teleport player to {spawn.location}
+            send "&aWelcome to spawn!" to player
+        else:
+            send "&cSpawn location is not set yet!"
+
+command /op-spawn:
+    trigger:
+        if player has permission "op":
+            if {op.spawn.location} is set:
+                teleport player to {op.spawn.location}
+                send "&aWelcome to spawn!" to player
+            else:
+                send "&cOperator spawn location is not set yet!"
+        else:
+            send "&cYou must be an operator to use this command!"
+
+on join:
+    if {spawn.location} is set:
+        teleport player to {spawn.location}
+        send "&aWelcome to spawn!" to player
+
+on respawn:
+    if {spawn.location} is set:
+        set respawn location to {spawn.location}
+        send "&aWelcome to spawn!" to player
